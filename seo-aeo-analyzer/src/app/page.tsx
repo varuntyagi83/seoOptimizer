@@ -79,7 +79,7 @@ export default function Home() {
       addLog(`analyzed: ${pageUrl} (${scores.overall})`)
     })
 
-    es.addEventListener('error', (e) => {
+    es.addEventListener('fail', (e) => {
       const msg = (e as MessageEvent).data
       if (!msg) return
       const { message, url: failedUrl } = JSON.parse(msg) as { message: string; url?: string }

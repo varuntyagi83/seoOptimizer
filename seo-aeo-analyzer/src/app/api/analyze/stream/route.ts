@@ -75,16 +75,23 @@ export async function GET(request: NextRequest) {
       })
 
       orchestrator.on('error', (err) => {
-        send('error', { phase: err.phase, message: err.message, url: err.url })
+        // Use 'fail' not 'error' — browsers fire EventSource's built-in onerror
+        // for ANY event named 'error', even custom ones, closing the connection.
+        send('fail', { phase: err.phase, message: err.message, url: err.url })
       })
 
       // Handle client disconnect
       request.signal.addEventListener('abort', () => {
+        console.log('[Stream] CLIENT DISCONNECTED — aborting analysis for', url)
         orchestrator.cancel()
       })
 
+      console.log('[Stream] Starting analysis for:', url, '| maxPages:', maxPages, '| maxDepth:', maxDepth)
+
       try {
         const analysis = await orchestrator.start()
+
+        console.log('[Stream] Analysis complete — pages:', analysis.pages.length, '| scores:', analysis.scores)
 
         // Persist to Supabase (best-effort — don't block the response)
         saveAnalysis(analysis).catch(err =>
@@ -95,8 +102,11 @@ export async function GET(request: NextRequest) {
         const serialized = JSON.parse(JSON.stringify(analysis))
         send('complete', serialized)
       } catch (err) {
-        send('error', { message: err instanceof Error ? err.message : 'Analysis failed' })
+        const msg = err instanceof Error ? err.message : 'Analysis failed'
+        console.error('[Stream] FATAL ERROR:', msg)
+        send('error', { message: msg })
       } finally {
+        console.log('[Stream] Stream closing for:', url)
         controller.close()
       }
     },
