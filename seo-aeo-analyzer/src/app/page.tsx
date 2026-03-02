@@ -136,7 +136,7 @@ export default function Home() {
               onChange={e => setUrl(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && !isRunning && startAnalysis()}
               disabled={isRunning}
-              className="bg-slate-950 border-slate-700 text-slate-100 placeholder:text-slate-600 focus-visible:ring-cyan-500 font-mono"
+              className="bg-slate-950 border-slate-700 text-slate-100 placeholder:text-slate-600 focus-visible:ring-cyan-500 font-mono selection:bg-cyan-400/40 selection:text-white"
             />
             {isRunning ? (
               <Button

@@ -102,6 +102,7 @@ export class PageFetcher {
   private async fetchFromArchive(url: string, depth: number): Promise<CrawledPage> {
     const availUrl = `https://archive.org/wayback/available?url=${encodeURIComponent(url)}`
     const availRes = await fetch(availUrl, {
+      signal: AbortSignal.timeout(8000),
       headers: { 'User-Agent': randomUA() },
     })
     const avail = await availRes.json() as {
@@ -116,6 +117,7 @@ export class PageFetcher {
     // Wayback URLs come as http:// — upgrade to https
     const archiveUrl = snapshot.url.replace(/^http:\/\//, 'https://')
     const response = await fetch(archiveUrl, {
+      signal: AbortSignal.timeout(15000),
       headers: { 'User-Agent': randomUA(), 'Accept-Encoding': 'identity' },
       redirect: 'follow',
     })
@@ -223,6 +225,9 @@ export class PageFetcher {
           minTimeout: 1000,
           maxTimeout: 8000,
           factor: 2,
+          // Don't waste retries on 403 — either it's consistently blocked (depth > 0
+          // will just fail) or we'll try Wayback after the first attempt (depth 0)
+          shouldRetry: (error) => !String(error).includes('403'),
           onFailedAttempt: (error) => {
             console.warn(`[Fetcher] Attempt ${error.attemptNumber} failed for ${url}: ${String(error)}`)
           },
@@ -232,9 +237,11 @@ export class PageFetcher {
       this.circuitBreaker.recordSuccess()
       return page
     } catch (err) {
-      // If all retries failed with 403, try Wayback Machine archive as fallback
+      // If direct fetch failed with 403, try Wayback Machine — but only for the
+      // start URL (depth 0). Deeper pages on 403-blocked sites are all blocked;
+      // trying Wayback for every subpage causes archive.org rate-limiting and hangs.
       const msg = err instanceof Error ? err.message : String(err)
-      if (msg.includes('403')) {
+      if (msg.includes('403') && depth === 0) {
         try {
           console.info(`[Fetcher] Falling back to Wayback Machine for ${url}`)
           const archived = await this.fetchFromArchive(url, depth)
