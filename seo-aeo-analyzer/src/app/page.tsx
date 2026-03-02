@@ -77,15 +77,22 @@ export default function Home() {
     es.addEventListener('error', (e) => {
       const msg = (e as MessageEvent).data
       if (!msg) return
-      const { message } = JSON.parse(msg) as { message: string }
-      setError(message)
-      addLog(`error: ${message}`)
+      const { message, url: failedUrl } = JSON.parse(msg) as { message: string; url?: string }
+      // Only show in the error banner if it's a fatal error (no specific page URL)
+      // Per-page failures are just logged — the analysis continues with other pages
+      if (!failedUrl) {
+        setError(message)
+        addLog(`error: ${message}`)
+      } else {
+        addLog(`skipped: ${failedUrl}`)
+      }
     })
 
     es.addEventListener('complete', (e) => {
       const result = JSON.parse((e as MessageEvent).data) as SiteAnalysis
       setAnalysis(result)
       setState('complete')
+      setError(null)
       es.close()
     })
 

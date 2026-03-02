@@ -16,23 +16,18 @@ const PRESETS = {
   Deep:     { maxPages: 100, maxDepth: 3 },
 }
 
-const PAGE_STEPS = [10, 25, 50, 100]
-
 export function CrawlSettings({ maxPages, maxDepth, onChange, disabled }: CrawlSettingsProps) {
   function setPreset(name: keyof typeof PRESETS) {
     onChange(PRESETS[name])
   }
 
   function handlePageSlider(value: number[]) {
-    const idx = Math.round(value[0])
-    onChange({ maxPages: PAGE_STEPS[idx], maxDepth })
+    onChange({ maxPages: value[0], maxDepth })
   }
 
   function handleDepthSlider(value: number[]) {
     onChange({ maxPages, maxDepth: value[0] })
   }
-
-  const pageIdx = PAGE_STEPS.indexOf(maxPages)
 
   return (
     <div className="space-y-5">
@@ -63,20 +58,19 @@ export function CrawlSettings({ maxPages, maxDepth, onChange, disabled }: CrawlS
           <span className="text-cyan-400 font-mono font-semibold">{maxPages} pages</span>
         </div>
         <Slider
-          min={0}
-          max={3}
+          min={1}
+          max={50}
           step={1}
-          value={[pageIdx >= 0 ? pageIdx : 1]}
+          value={[maxPages]}
           onValueChange={handlePageSlider}
           disabled={disabled}
           className="[&_[role=slider]]:bg-cyan-400 [&_[role=slider]]:border-cyan-400 [&_[data-slot=slider-track]]:bg-white/20 [&_[data-slot=slider-range]]:bg-white"
         />
-        <div className="flex justify-between text-xs">
-          {PAGE_STEPS.map(p => (
-            <span key={p} className={p === maxPages ? 'text-cyan-400 font-semibold' : 'text-slate-600'}>
-              {p}
-            </span>
-          ))}
+        <div className="flex justify-between text-xs text-slate-600">
+          <span>1</span>
+          <span>10</span>
+          <span>25</span>
+          <span>50</span>
         </div>
       </div>
 

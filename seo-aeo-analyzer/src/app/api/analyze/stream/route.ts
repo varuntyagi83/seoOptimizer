@@ -10,7 +10,7 @@ const QuerySchema = z.object({
   url: z.string().url('Invalid URL'),
   maxPages: z.coerce.number().int().min(1).max(100).default(25),
   maxDepth: z.coerce.number().int().min(1).max(3).default(2),
-  includeSitemap: z.coerce.boolean().default(true),
+  includeSitemap: z.coerce.boolean().default(false),
 })
 
 function sseEvent(event: string, data: unknown): string {
