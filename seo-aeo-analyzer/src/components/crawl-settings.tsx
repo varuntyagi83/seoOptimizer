@@ -60,7 +60,7 @@ export function CrawlSettings({ maxPages, maxDepth, onChange, disabled }: CrawlS
       <div className="space-y-2">
         <div className="flex justify-between text-sm">
           <span className="text-slate-400">Max Pages</span>
-          <span className="text-cyan-400 font-mono font-semibold">{maxPages}</span>
+          <span className="text-cyan-400 font-mono font-semibold">{maxPages} pages</span>
         </div>
         <Slider
           min={0}
@@ -71,8 +71,12 @@ export function CrawlSettings({ maxPages, maxDepth, onChange, disabled }: CrawlS
           disabled={disabled}
           className="[&_[role=slider]]:bg-cyan-400 [&_[role=slider]]:border-cyan-400"
         />
-        <div className="flex justify-between text-xs text-slate-600">
-          {PAGE_STEPS.map(p => <span key={p}>{p}</span>)}
+        <div className="flex justify-between text-xs">
+          {PAGE_STEPS.map(p => (
+            <span key={p} className={p === maxPages ? 'text-cyan-400 font-semibold' : 'text-slate-600'}>
+              {p}
+            </span>
+          ))}
         </div>
       </div>
 
@@ -80,7 +84,7 @@ export function CrawlSettings({ maxPages, maxDepth, onChange, disabled }: CrawlS
       <div className="space-y-2">
         <div className="flex justify-between text-sm">
           <span className="text-slate-400">Crawl Depth</span>
-          <span className="text-cyan-400 font-mono font-semibold">{maxDepth}</span>
+          <span className="text-cyan-400 font-mono font-semibold">depth {maxDepth}</span>
         </div>
         <Slider
           min={1}
