@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 import { AnalysisOrchestrator } from '@/lib/orchestrator'
+import { saveAnalysis } from '@/lib/supabase'
 import type { CrawlConfig } from '@/types/crawler'
 
 export const maxDuration = 300 // 5 minutes for Vercel
@@ -84,6 +85,11 @@ export async function GET(request: NextRequest) {
 
       try {
         const analysis = await orchestrator.start()
+
+        // Persist to Supabase (best-effort — don't block the response)
+        saveAnalysis(analysis).catch(err =>
+          console.error('[Stream] saveAnalysis failed:', err)
+        )
 
         // Serialize dates so JSON.stringify works cleanly
         const serialized = JSON.parse(JSON.stringify(analysis))

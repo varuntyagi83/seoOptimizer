@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "src/app/api/analyze/stream/route.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/ai-recommendations/route.ts": {
+      "maxDuration": 60
+    }
+  }
+}
