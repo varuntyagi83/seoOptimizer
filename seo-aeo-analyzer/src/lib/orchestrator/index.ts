@@ -5,6 +5,7 @@ import type { OrchestratorState, OrchestratorContext, OrchestratorError } from '
 import { SiteCrawler } from '@/lib/crawler'
 import { analyzePages } from '@/lib/analyzer'
 import { aggregateSiteAnalysis } from '@/lib/analyzer/aggregator'
+import { generateRecommendations } from '@/lib/openai'
 
 interface OrchestratorEvents {
   'state-change': (event: { from: OrchestratorState; to: OrchestratorState; timestamp: Date }) => void
@@ -144,9 +145,16 @@ export class AnalysisOrchestrator extends EventEmitter<OrchestratorEvents> {
       siteAnalysis = this.buildPartialResult(crawledPages, pageAnalyses)
     }
 
-    // ── Phase 4: AI (placeholder — wired up in Phase 6) ────────────────────
-    // OpenAI recommendations are added by the API route after calling this
+    // ── Phase 4: AI recommendations ─────────────────────────────────────────
     this.transition('ai-processing')
+    try {
+      const aiRecommendations = await generateRecommendations(siteAnalysis)
+      siteAnalysis = { ...siteAnalysis, aiRecommendations }
+      this.context.siteAnalysis = siteAnalysis
+    } catch (err) {
+      this.recordError('ai-processing', err instanceof Error ? err.message : String(err))
+      // Graceful degradation: return results without AI recommendations
+    }
 
     // ── Complete ─────────────────────────────────────────────────────────────
     this.context.completedAt = new Date()
