@@ -59,7 +59,7 @@ export function CrawlSettings({ maxPages, maxDepth, onChange, disabled }: CrawlS
       {/* Max pages slider */}
       <div className="space-y-2">
         <div className="flex justify-between text-sm">
-          <span className="text-slate-400">Max Pages</span>
+          <span className="text-white">Max Pages</span>
           <span className="text-cyan-400 font-mono font-semibold">{maxPages} pages</span>
         </div>
         <Slider
@@ -69,7 +69,7 @@ export function CrawlSettings({ maxPages, maxDepth, onChange, disabled }: CrawlS
           value={[pageIdx >= 0 ? pageIdx : 1]}
           onValueChange={handlePageSlider}
           disabled={disabled}
-          className="[&_[role=slider]]:bg-cyan-400 [&_[role=slider]]:border-cyan-400"
+          className="[&_[role=slider]]:bg-cyan-400 [&_[role=slider]]:border-cyan-400 [&_[data-slot=slider-track]]:bg-white/20 [&_[data-slot=slider-range]]:bg-white"
         />
         <div className="flex justify-between text-xs">
           {PAGE_STEPS.map(p => (
@@ -83,7 +83,7 @@ export function CrawlSettings({ maxPages, maxDepth, onChange, disabled }: CrawlS
       {/* Max depth slider */}
       <div className="space-y-2">
         <div className="flex justify-between text-sm">
-          <span className="text-slate-400">Crawl Depth</span>
+          <span className="text-white">Crawl Depth</span>
           <span className="text-cyan-400 font-mono font-semibold">depth {maxDepth}</span>
         </div>
         <Slider
@@ -93,7 +93,7 @@ export function CrawlSettings({ maxPages, maxDepth, onChange, disabled }: CrawlS
           value={[maxDepth]}
           onValueChange={handleDepthSlider}
           disabled={disabled}
-          className="[&_[role=slider]]:bg-cyan-400 [&_[role=slider]]:border-cyan-400"
+          className="[&_[role=slider]]:bg-cyan-400 [&_[role=slider]]:border-cyan-400 [&_[data-slot=slider-track]]:bg-white/20 [&_[data-slot=slider-range]]:bg-white"
         />
         <div className="flex justify-between text-xs text-slate-600">
           <span>Shallow</span>

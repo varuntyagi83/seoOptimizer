@@ -38,6 +38,8 @@ export async function analyzePages(
     const batchResults = await Promise.all(
       batch.map(async (page) => {
         const result = await analyzePage(page)
+        // Free HTML string from memory — not needed after analysis
+        page.html = ''
         onProgress?.(results.length + 1, total, page.url)
         return result
       })

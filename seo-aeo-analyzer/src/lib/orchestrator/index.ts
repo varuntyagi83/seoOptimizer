@@ -87,18 +87,21 @@ export class AnalysisOrchestrator extends EventEmitter<OrchestratorEvents> {
       crawledPages = this.crawler.getPages()
       this.context.crawledPages = crawledPages
 
-      if (crawledPages.length === 0) {
-        this.recordError('crawling', 'No pages were successfully crawled')
-      }
     } catch (err) {
       this.recordError('crawling', err instanceof Error ? err.message : String(err), undefined, false)
-      // Continue with whatever pages we managed to get
       crawledPages = this.crawler?.getPages() ?? []
       this.context.crawledPages = crawledPages
     }
 
     if (this._cancelled) {
       return this.buildPartialResult(crawledPages, [])
+    }
+
+    if (crawledPages.length === 0) {
+      const lastError = this.context.errors.at(-1)
+      const msg = lastError?.message ?? 'No pages were successfully crawled. The website may be blocking access.'
+      this.transition('error')
+      throw new Error(msg)
     }
 
     // ── Phase 2: Analyze ────────────────────────────────────────────────────

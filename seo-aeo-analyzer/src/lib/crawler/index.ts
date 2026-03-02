@@ -57,15 +57,34 @@ export class SiteCrawler extends EventEmitter<CrawlerEvents> {
     const urls: string[] = []
     try {
       const sitemapUrl = new URL('/sitemap.xml', baseUrl).toString()
-      const res = await fetch(sitemapUrl, { signal: AbortSignal.timeout(5000) })
+      const res = await fetch(sitemapUrl, {
+        signal: AbortSignal.timeout(5000),
+        headers: { 'Accept-Encoding': 'identity' },
+      })
       if (!res.ok) return urls
-      const text = await res.text()
+      // Stream-read up to 512KB — enough for thousands of URLs without
+      // loading a multi-MB sitemap entirely into memory
+      const MAX_SITEMAP_CHARS = 512 * 1024
+      const reader = res.body?.getReader()
+      let text = ''
+      if (reader) {
+        const decoder = new TextDecoder()
+        while (text.length < MAX_SITEMAP_CHARS) {
+          const { done, value } = await reader.read()
+          if (done || !value) break
+          text += decoder.decode(value, { stream: true })
+        }
+        text += decoder.decode()
+        reader.cancel().catch(() => {})
+      }
+      const hostname = new URL(baseUrl).hostname
       const matches = text.matchAll(/<loc>(.*?)<\/loc>/gi)
       for (const match of matches) {
         const url = match[1].trim()
-        if (url.startsWith(baseUrl) || new URL(url).hostname === new URL(baseUrl).hostname) {
-          urls.push(url)
-        }
+        try {
+          if (new URL(url).hostname === hostname) urls.push(url)
+        } catch { /* skip malformed */ }
+        if (urls.length >= this.config.maxPages) break
       }
     } catch {
       // Sitemap not available — continue without it
@@ -96,8 +115,9 @@ export class SiteCrawler extends EventEmitter<CrawlerEvents> {
     const inFlight = new Set<Promise<void>>()
 
     while (!this.cancelled) {
-      // Fill up to concurrency limit
-      while (inFlight.size < this.config.concurrency && !this.queue.isFull()) {
+      // Fill up to concurrency limit — isFull() only gates new link discovery,
+      // not dequeuing URLs already enqueued before the limit was reached
+      while (inFlight.size < this.config.concurrency) {
         const job = this.queue.dequeue()
         if (!job) break
 
