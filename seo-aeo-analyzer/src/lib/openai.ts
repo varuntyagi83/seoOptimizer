@@ -1,7 +1,9 @@
 import OpenAI from 'openai'
 import type { SiteAnalysis, AIRecommendations, Recommendation } from '@/types/analysis'
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+function getClient() {
+  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+}
 
 const SYSTEM_PROMPT = `You are an expert SEO and AEO (Answer Engine Optimization) consultant analyzing a multi-page website audit.
 
@@ -119,7 +121,7 @@ function parseRecommendations(raw: Record<string, unknown>): AIRecommendations {
 }
 
 export async function generateRecommendations(analysis: SiteAnalysis): Promise<AIRecommendations> {
-  const response = await client.chat.completions.create({
+  const response = await getClient().chat.completions.create({
     model: 'gpt-4.1',
     response_format: { type: 'json_object' },
     temperature: 0.3,
