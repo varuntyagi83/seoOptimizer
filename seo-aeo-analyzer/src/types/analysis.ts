@@ -38,12 +38,28 @@ export interface Recommendation {
   codeSnippet?: string
 }
 
+export interface PageRecommendation {
+  url: string
+  priority: number  // 1 = highest priority
+  scoreBreakdown: { seo: number; aeo: number; overall: number }
+  topIssues: string[]
+  fixes: string[]
+}
+
+export interface ExecutiveSummary {
+  narrative: string                  // 2-3 sentence overview
+  scoreContext: string               // what the score means + path to 90+
+  biggestWin: string                 // single most impactful action
+}
+
 export interface AIRecommendations {
+  executiveSummary: ExecutiveSummary
   siteWide: Recommendation[]
   critical: Recommendation[]
   important: Recommendation[]
   enhancements: Recommendation[]
   quickWins: Recommendation[]
+  pageSpecific: PageRecommendation[]
 }
 
 export interface SiteAnalysis {
