@@ -32,6 +32,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null)
 
   const esRef = useRef<EventSource | null>(null)
+  const completeReceivedRef = useRef(false)
   const isRunning = !['idle', 'complete', 'error', 'cancelled'].includes(state)
 
   function addLog(msg: string) {
@@ -41,6 +42,10 @@ export default function Home() {
   const startAnalysis = useCallback(() => {
     if (!url.trim()) return
     const normalizedUrl = url.startsWith('http') ? url : `https://${url}`
+
+    // Close any existing connection before starting a new one
+    esRef.current?.close()
+    completeReceivedRef.current = false
 
     setError(null)
     setAnalysis(null)
@@ -90,6 +95,7 @@ export default function Home() {
 
     es.addEventListener('complete', (e) => {
       const result = JSON.parse((e as MessageEvent).data) as SiteAnalysis
+      completeReceivedRef.current = true
       setAnalysis(result)
       setState('complete')
       setError(null)
@@ -97,7 +103,11 @@ export default function Home() {
     })
 
     es.onerror = () => {
-      setState(prev => prev !== 'complete' ? 'error' : prev)
+      // The server closes the connection after sending 'complete', which also fires
+      // onerror. Guard against that race by checking if complete was already received.
+      if (!completeReceivedRef.current) {
+        setState(prev => !['complete', 'cancelled'].includes(prev) ? 'error' : prev)
+      }
       es.close()
     }
   }, [url, maxPages, maxDepth])
