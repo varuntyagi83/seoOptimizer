@@ -1,3 +1,4 @@
+// SSE streaming endpoint for site analysis
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 import { AnalysisOrchestrator } from '@/lib/orchestrator'
