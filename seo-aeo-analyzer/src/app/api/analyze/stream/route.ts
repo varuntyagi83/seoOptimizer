@@ -104,7 +104,7 @@ export async function GET(request: NextRequest) {
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Analysis failed'
         console.error('[Stream] FATAL ERROR:', msg)
-        send('error', { message: msg })
+        send('fail', { message: msg })
       } finally {
         console.log('[Stream] Stream closing for:', url)
         controller.close()

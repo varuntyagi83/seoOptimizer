@@ -87,6 +87,7 @@ export default function Home() {
       // Per-page failures are just logged — the analysis continues with other pages
       if (!failedUrl) {
         setError(message)
+        setState('error')
         addLog(`error: ${message}`)
       } else {
         addLog(`skipped: ${failedUrl}`)
