@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import type { SiteAnalysis } from '@/types/analysis'
+import type { SiteAnalysis, PageAnalysis } from '@/types/analysis'
 
 // ── Browser client (uses anon key) ────────────────────────────────────────────
 export function createBrowserClient() {
@@ -31,6 +31,7 @@ export interface SavedAnalysis {
   stats: SiteAnalysis['stats']
   site_wide_issues: SiteAnalysis['siteWideIssues']
   ai_recommendations: SiteAnalysis['aiRecommendations'] | null
+  pages: PageAnalysis[]
   created_at: string
 }
 
@@ -53,6 +54,7 @@ export async function saveAnalysis(
       stats: analysis.stats,
       site_wide_issues: analysis.siteWideIssues,
       ai_recommendations: analysis.aiRecommendations ?? null,
+      pages: analysis.pages,
     })
     .select('id')
     .single()
@@ -84,6 +86,25 @@ export async function getAnalysisHistory(
   }
 
   return data as SavedAnalysis[]
+}
+
+export async function getRecentAnalysisByUrl(startUrl: string): Promise<SavedAnalysis | null> {
+  const supabase = createServerClient()
+
+  const { data, error } = await supabase
+    .from('site_analyses')
+    .select('*')
+    .eq('start_url', startUrl)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (error) {
+    console.error('[Supabase] getRecentAnalysisByUrl error:', error.message)
+    return null
+  }
+
+  return data as SavedAnalysis | null
 }
 
 export async function getAnalysisById(id: string): Promise<SavedAnalysis | null> {

@@ -40,10 +40,10 @@ export function CrawlSettings({ maxPages, maxDepth, onChange, disabled }: CrawlS
             size="sm"
             disabled={disabled}
             onClick={() => setPreset(name)}
-            className={`flex-1 border-slate-700 text-slate-300 hover:border-cyan-500 hover:text-cyan-400 transition-colors ${
+            className={`flex-1 transition-colors ${
               maxPages === PRESETS[name].maxPages && maxDepth === PRESETS[name].maxDepth
-                ? 'border-cyan-500 text-cyan-400 bg-cyan-950/30'
-                : 'bg-transparent'
+                ? 'border-cyan-500 text-cyan-500 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-950/30'
+                : 'border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-cyan-400 hover:text-cyan-500 dark:hover:border-cyan-500 dark:hover:text-cyan-400 bg-transparent'
             }`}
           >
             {name}
@@ -54,8 +54,8 @@ export function CrawlSettings({ maxPages, maxDepth, onChange, disabled }: CrawlS
       {/* Max pages slider */}
       <div className="space-y-2">
         <div className="flex justify-between text-sm">
-          <span className="text-white">Max Pages</span>
-          <span className="text-cyan-400 font-mono font-semibold">{maxPages} pages</span>
+          <span className="text-slate-700 dark:text-white">Max Pages</span>
+          <span className="text-cyan-500 dark:text-cyan-400 font-mono font-semibold">{maxPages} pages</span>
         </div>
         <Slider
           min={1}
@@ -64,9 +64,9 @@ export function CrawlSettings({ maxPages, maxDepth, onChange, disabled }: CrawlS
           value={[maxPages]}
           onValueChange={handlePageSlider}
           disabled={disabled}
-          className="[&_[role=slider]]:bg-cyan-400 [&_[role=slider]]:border-cyan-400 [&_[data-slot=slider-track]]:bg-white/20 [&_[data-slot=slider-range]]:bg-white"
+          className="[&_[role=slider]]:bg-cyan-400 [&_[role=slider]]:border-cyan-400 [&_[data-slot=slider-track]]:bg-slate-200 dark:[&_[data-slot=slider-track]]:bg-white/20 [&_[data-slot=slider-range]]:bg-cyan-500 dark:[&_[data-slot=slider-range]]:bg-white"
         />
-        <div className="flex justify-between text-xs text-slate-600">
+        <div className="flex justify-between text-xs text-slate-400 dark:text-slate-600">
           <span>1</span>
           <span>10</span>
           <span>25</span>
@@ -77,8 +77,8 @@ export function CrawlSettings({ maxPages, maxDepth, onChange, disabled }: CrawlS
       {/* Max depth slider */}
       <div className="space-y-2">
         <div className="flex justify-between text-sm">
-          <span className="text-white">Crawl Depth</span>
-          <span className="text-cyan-400 font-mono font-semibold">depth {maxDepth}</span>
+          <span className="text-slate-700 dark:text-white">Crawl Depth</span>
+          <span className="text-cyan-500 dark:text-cyan-400 font-mono font-semibold">depth {maxDepth}</span>
         </div>
         <Slider
           min={1}
@@ -87,9 +87,9 @@ export function CrawlSettings({ maxPages, maxDepth, onChange, disabled }: CrawlS
           value={[maxDepth]}
           onValueChange={handleDepthSlider}
           disabled={disabled}
-          className="[&_[role=slider]]:bg-cyan-400 [&_[role=slider]]:border-cyan-400 [&_[data-slot=slider-track]]:bg-white/20 [&_[data-slot=slider-range]]:bg-white"
+          className="[&_[role=slider]]:bg-cyan-400 [&_[role=slider]]:border-cyan-400 [&_[data-slot=slider-track]]:bg-slate-200 dark:[&_[data-slot=slider-track]]:bg-white/20 [&_[data-slot=slider-range]]:bg-cyan-500 dark:[&_[data-slot=slider-range]]:bg-white"
         />
-        <div className="flex justify-between text-xs text-slate-600">
+        <div className="flex justify-between text-xs text-slate-400 dark:text-slate-600">
           <span>Shallow</span>
           <span>Medium</span>
           <span>Deep</span>

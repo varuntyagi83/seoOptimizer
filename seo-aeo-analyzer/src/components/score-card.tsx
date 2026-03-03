@@ -24,6 +24,22 @@ function getStatus(score: number): string {
 
 export function ScoreCard({ label, score, size = 120 }: ScoreCardProps) {
   const [displayed, setDisplayed] = useState(0)
+  const [trackColor, setTrackColor] = useState('#e2e8f0') // slate-200 default
+
+  useEffect(() => {
+    // Detect dark mode for SVG track color
+    const mq = window.matchMedia('(prefers-color-scheme: dark)')
+    const htmlDark = document.documentElement.classList.contains('dark')
+    const isDark = htmlDark || mq.matches
+    setTrackColor(isDark ? '#1e293b' : '#e2e8f0')
+
+    // Re-check when html class changes (theme toggle)
+    const observer = new MutationObserver(() => {
+      setTrackColor(document.documentElement.classList.contains('dark') ? '#1e293b' : '#e2e8f0')
+    })
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     let frame: number
@@ -33,7 +49,6 @@ export function ScoreCard({ label, score, size = 120 }: ScoreCardProps) {
     function animate(now: number) {
       const elapsed = now - start
       const progress = Math.min(elapsed / duration, 1)
-      // Ease out cubic
       const eased = 1 - Math.pow(1 - progress, 3)
       setDisplayed(Math.round(eased * score))
       if (progress < 1) frame = requestAnimationFrame(animate)
@@ -52,16 +67,14 @@ export function ScoreCard({ label, score, size = 120 }: ScoreCardProps) {
   return (
     <div className="flex flex-col items-center gap-2">
       <svg width={size} height={size} className="rotate-[-90deg]">
-        {/* Background ring */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#1e293b"
+          stroke={trackColor}
           strokeWidth={8}
         />
-        {/* Score ring */}
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -76,7 +89,6 @@ export function ScoreCard({ label, score, size = 120 }: ScoreCardProps) {
         />
       </svg>
 
-      {/* Score number centered inside ring */}
       <div className="relative" style={{ marginTop: -(size + 8) }}>
         <div
           className="flex flex-col items-center justify-center"
@@ -85,12 +97,12 @@ export function ScoreCard({ label, score, size = 120 }: ScoreCardProps) {
           <span className="text-3xl font-bold tabular-nums" style={{ color }}>
             {displayed}
           </span>
-          <span className="text-xs text-slate-500 mt-0.5">/ 100</span>
+          <span className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">/ 100</span>
         </div>
       </div>
 
       <div className="flex flex-col items-center gap-1 mt-1">
-        <span className="text-sm font-medium text-slate-300">{label}</span>
+        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{label}</span>
         <span
           className="text-xs px-2 py-0.5 rounded-full font-medium"
           style={{ backgroundColor: `${color}20`, color }}

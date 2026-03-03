@@ -11,15 +11,15 @@ interface CrawlProgressProps {
 }
 
 const STATE_CONFIG: Record<OrchestratorState, { label: string; color: string; icon: string }> = {
-  idle:           { label: 'Idle',             color: 'text-slate-500',  icon: '○' },
-  initializing:   { label: 'Initializing…',    color: 'text-blue-400',   icon: '◌' },
-  crawling:       { label: 'Crawling pages…',  color: 'text-cyan-400',   icon: '⟳' },
-  analyzing:      { label: 'Analyzing pages…', color: 'text-violet-400', icon: '◈' },
-  aggregating:    { label: 'Aggregating…',     color: 'text-indigo-400', icon: '◉' },
-  'ai-processing':{ label: 'AI thinking…',     color: 'text-amber-400',  icon: '✦' },
-  complete:       { label: 'Complete',          color: 'text-emerald-400',icon: '✓' },
-  error:          { label: 'Error',             color: 'text-red-400',    icon: '✕' },
-  cancelled:      { label: 'Cancelled',         color: 'text-slate-500',  icon: '⊘' },
+  idle:           { label: 'Idle',             color: 'text-slate-400 dark:text-slate-500',  icon: '○' },
+  initializing:   { label: 'Initializing…',    color: 'text-blue-500 dark:text-blue-400',    icon: '◌' },
+  crawling:       { label: 'Crawling pages…',  color: 'text-cyan-500 dark:text-cyan-400',    icon: '⟳' },
+  analyzing:      { label: 'Analyzing pages…', color: 'text-violet-500 dark:text-violet-400',icon: '◈' },
+  aggregating:    { label: 'Aggregating…',     color: 'text-indigo-500 dark:text-indigo-400',icon: '◉' },
+  'ai-processing':{ label: 'AI thinking…',     color: 'text-amber-500 dark:text-amber-400',  icon: '✦' },
+  complete:       { label: 'Complete',          color: 'text-emerald-500 dark:text-emerald-400',icon: '✓' },
+  error:          { label: 'Error',             color: 'text-red-500 dark:text-red-400',      icon: '✕' },
+  cancelled:      { label: 'Cancelled',         color: 'text-slate-400 dark:text-slate-500',  icon: '⊘' },
 }
 
 function getProgressPercent(state: OrchestratorState, progress: CrawlProgress): number {
@@ -50,13 +50,13 @@ export function CrawlProgressPanel({ state, progress, log }: CrawlProgressProps)
         </span>
         <span className={`text-sm font-medium ${config.color}`}>{config.label}</span>
         {state === 'crawling' && progress.total > 0 && (
-          <span className="ml-auto text-xs text-slate-500 tabular-nums">
+          <span className="ml-auto text-xs text-slate-400 dark:text-slate-500 tabular-nums">
             {progress.completed}/{progress.total} pages
             {progress.pagesPerSecond > 0 && ` · ${progress.pagesPerSecond}/s`}
           </span>
         )}
         {state === 'crawling' && progress.estimatedTimeRemaining > 0 && (
-          <span className="text-xs text-slate-600 tabular-nums">
+          <span className="text-xs text-slate-400 dark:text-slate-600 tabular-nums">
             ~{progress.estimatedTimeRemaining}s left
           </span>
         )}
@@ -65,12 +65,12 @@ export function CrawlProgressPanel({ state, progress, log }: CrawlProgressProps)
       {/* Progress bar */}
       <Progress
         value={percent}
-        className="h-1.5 bg-slate-800 [&>div]:bg-gradient-to-r [&>div]:from-cyan-500 [&>div]:to-violet-500 [&>div]:transition-all [&>div]:duration-500"
+        className="h-1.5 bg-slate-200 dark:bg-slate-800 [&>div]:bg-gradient-to-r [&>div]:from-cyan-500 [&>div]:to-violet-500 [&>div]:transition-all [&>div]:duration-500"
       />
 
       {/* Current URL */}
       {progress.currentUrl && (
-        <p className="text-xs text-slate-600 truncate font-mono">
+        <p className="text-xs text-slate-400 dark:text-slate-600 truncate font-mono">
           → {progress.currentUrl}
         </p>
       )}
@@ -81,7 +81,7 @@ export function CrawlProgressPanel({ state, progress, log }: CrawlProgressProps)
           {log.slice(-5).reverse().map((entry, i) => (
             <p
               key={i}
-              className="text-xs text-slate-600 truncate font-mono"
+              className="text-xs text-slate-400 dark:text-slate-500 truncate font-mono"
               style={{ opacity: 1 - i * 0.15 }}
             >
               {entry}
