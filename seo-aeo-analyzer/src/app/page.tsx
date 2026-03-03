@@ -11,7 +11,6 @@ import { SiteOverview } from '@/components/site-overview'
 import { PageList } from '@/components/page-list'
 import { AIRecommendationsPanel } from '@/components/ai-recommendations'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { downloadReport } from '@/components/pdf-report'
 import type { SiteAnalysis, PageAnalysis } from '@/types/analysis'
 import type { OrchestratorState } from '@/types/orchestrator'
 import type { CrawlProgress } from '@/types/crawler'
@@ -179,6 +178,7 @@ export default function Home() {
     if (!analysis) return
     setIsExporting(true)
     try {
+      const { downloadReport } = await import('@/components/pdf-report')
       await downloadReport(analysis)
     } finally {
       setIsExporting(false)
