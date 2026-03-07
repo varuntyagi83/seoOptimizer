@@ -293,7 +293,7 @@ function CoverPage({ analysis }: { analysis: SiteAnalysis }) {
   )
 }
 
-function ScoresPage({ analysis }: { analysis: SiteAnalysis }) {
+function ScoresPage({ analysis, total }: { analysis: SiteAnalysis; total: string }) {
   const { scores, stats } = analysis
 
   return (
@@ -354,12 +354,12 @@ function ScoresPage({ analysis }: { analysis: SiteAnalysis }) {
           ))}
         </View>
       </View>
-      <PageFooter pageNum="2" total="—" />
+      <PageFooter pageNum="2" total={total} />
     </Page>
   )
 }
 
-function IssuesPage({ analysis }: { analysis: SiteAnalysis }) {
+function IssuesPage({ analysis, total }: { analysis: SiteAnalysis; total: string }) {
   const { siteWideIssues } = analysis
   const critical = siteWideIssues.critical
   const warnings = siteWideIssues.warnings
@@ -418,12 +418,12 @@ function IssuesPage({ analysis }: { analysis: SiteAnalysis }) {
           </View>
         )}
       </View>
-      <PageFooter pageNum="3" total="—" />
+      <PageFooter pageNum="3" total={total} />
     </Page>
   )
 }
 
-function PageSummaryTable({ analysis }: { analysis: SiteAnalysis }) {
+function PageSummaryTable({ analysis, pageNum, total }: { analysis: SiteAnalysis; pageNum: string; total: string }) {
   const pages = analysis.pages.slice(0, 30) // cap at 30 for table
 
   return (
@@ -479,7 +479,7 @@ function PageSummaryTable({ analysis }: { analysis: SiteAnalysis }) {
           </Text>
         )}
       </View>
-      <PageFooter pageNum="4" total="—" />
+      <PageFooter pageNum={pageNum} total={total} />
     </Page>
   )
 }
@@ -561,7 +561,7 @@ function PageDetailCard({ page }: { page: PageAnalysis }) {
   )
 }
 
-function PageDetailPages({ pages }: { pages: PageAnalysis[] }) {
+function PageDetailPages({ pages, startPage, total }: { pages: PageAnalysis[]; startPage: number; total: string }) {
   return (
     <>
       {pages.map((page, i) => (
@@ -573,7 +573,7 @@ function PageDetailPages({ pages }: { pages: PageAnalysis[] }) {
             )}
             <PageDetailCard page={page} />
           </View>
-          <PageFooter pageNum={`${5 + i}`} total="—" />
+          <PageFooter pageNum={`${startPage + i}`} total={total} />
         </Page>
       ))}
     </>
@@ -587,6 +587,17 @@ function ReportDocument({ analysis }: { analysis: SiteAnalysis }) {
     analysis.siteWideIssues.critical.length +
     analysis.siteWideIssues.warnings.length +
     analysis.siteWideIssues.opportunities.length > 0
+  const hasPages = analysis.pages.length > 0
+
+  const total = String(
+    2 +
+    (hasIssues ? 1 : 0) +
+    (hasPages ? 1 : 0) +
+    analysis.pages.length
+  )
+
+  const summaryPageNum = String(2 + (hasIssues ? 1 : 0) + 1)
+  const detailStartPage = 2 + (hasIssues ? 1 : 0) + (hasPages ? 1 : 0) + 1
 
   return (
     <Document
@@ -596,12 +607,12 @@ function ReportDocument({ analysis }: { analysis: SiteAnalysis }) {
       keywords="SEO, AEO, analysis, report"
     >
       <CoverPage analysis={analysis} />
-      <ScoresPage analysis={analysis} />
-      {hasIssues && <IssuesPage analysis={analysis} />}
-      {analysis.pages.length > 0 && (
+      <ScoresPage analysis={analysis} total={total} />
+      {hasIssues && <IssuesPage analysis={analysis} total={total} />}
+      {hasPages && (
         <>
-          <PageSummaryTable analysis={analysis} />
-          <PageDetailPages pages={analysis.pages} />
+          <PageSummaryTable analysis={analysis} pageNum={summaryPageNum} total={total} />
+          <PageDetailPages pages={analysis.pages} startPage={detailStartPage} total={total} />
         </>
       )}
     </Document>
