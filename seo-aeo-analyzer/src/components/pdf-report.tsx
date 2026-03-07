@@ -6,10 +6,9 @@ import {
   Text,
   View,
   StyleSheet,
-  Font,
   pdf,
 } from '@react-pdf/renderer'
-import type { SiteAnalysis, PageAnalysis, SiteIssue, CheckItem } from '@/types/analysis'
+import type { SiteAnalysis, PageAnalysis, SiteIssue } from '@/types/analysis'
 
 // ─── Palette ────────────────────────────────────────────────────────────────
 const C = {
@@ -240,29 +239,6 @@ function IssueBlock({ issue }: { issue: SiteIssue }) {
   )
 }
 
-function ChecksSection({ title, checks }: { title: string; checks: CheckItem[] }) {
-  if (checks.length === 0) return null
-  return (
-    <View style={S.checkSection}>
-      <Text style={S.checkSectionTitle}>{title}</Text>
-      {checks.map((c, i) => (
-        <View key={i}>
-          <View style={S.checkItem}>
-            <View style={[S.checkDot,
-              c.status === 'pass' ? S.checkDotPass :
-              c.status === 'warning' ? S.checkDotWarn : S.checkDotFail
-            ]} />
-            <Text style={S.checkTag}>{c.tag}</Text>
-            <Text style={S.checkFound}>{truncate(c.found, 80)}</Text>
-          </View>
-          {c.recommendation && (
-            <Text style={S.checkRec}>↳ {truncate(c.recommendation, 120)}</Text>
-          )}
-        </View>
-      ))}
-    </View>
-  )
-}
 
 // ─── Pages ────────────────────────────────────────────────────────────────────
 
@@ -508,104 +484,106 @@ function PageSummaryTable({ analysis }: { analysis: SiteAnalysis }) {
   )
 }
 
-function PageDetailPages({ pages }: { pages: PageAnalysis[] }) {
-  // Group pages into chunks per PDF page (3 per PDF page)
-  const chunks: PageAnalysis[][] = []
-  for (let i = 0; i < pages.length; i += 2) {
-    chunks.push(pages.slice(i, i + 2))
-  }
+function PageDetailCard({ page }: { page: PageAnalysis }) {
+  const failCount = [...page.meta, ...page.content, ...page.technical, ...page.aeo].filter(c => c.status === 'fail').length
+  const warnCount = [...page.meta, ...page.content, ...page.technical, ...page.aeo].filter(c => c.status === 'warning').length
 
   return (
-    <>
-      {chunks.map((chunk, ci) => (
-        <Page key={ci} size="A4" style={S.page}>
-          <PageHeader domain={pages[0] ? new URL(pages[0].url).hostname : ''} />
-          <View style={S.pageContent}>
-            {ci === 0 && (
-              <SectionHeader title="Per-Page Analysis" subtitle="Detailed checks for each crawled page" />
-            )}
-
-            {chunk.map((page) => {
-              const failCount = [...page.meta, ...page.content, ...page.technical, ...page.aeo].filter(c => c.status === 'fail').length
-              const warnCount = [...page.meta, ...page.content, ...page.technical, ...page.aeo].filter(c => c.status === 'warning').length
-
-              return (
-                <View key={page.url} style={S.pageDetailCard} wrap={false}>
-                  {/* Header */}
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                    <Text style={[S.pageDetailUrl, { flex: 1, marginRight: 8 }]}>{formatUrl(page.url)}</Text>
-                    <View style={{ flexDirection: 'row', gap: 4 }}>
-                      <View style={{ backgroundColor: '#0c1a2e', borderRadius: 4, padding: '2 6' }}>
-                        <Text style={{ fontSize: 7, color: C.cyan }}>D{page.depth}</Text>
-                      </View>
-                      {failCount > 0 && (
-                        <View style={{ backgroundColor: '#450a0a', borderRadius: 4, padding: '2 6' }}>
-                          <Text style={{ fontSize: 7, color: C.red }}>{failCount} fail{failCount !== 1 ? 's' : ''}</Text>
-                        </View>
-                      )}
-                      {warnCount > 0 && (
-                        <View style={{ backgroundColor: '#422006', borderRadius: 4, padding: '2 6' }}>
-                          <Text style={{ fontSize: 7, color: C.yellow }}>{warnCount} warn{warnCount !== 1 ? 's' : ''}</Text>
-                        </View>
-                      )}
-                    </View>
-                  </View>
-
-                  {/* Scores */}
-                  <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
-                    {[
-                      { label: 'Overall', score: page.scores.overall },
-                      { label: 'SEO', score: page.scores.seo },
-                      { label: 'AEO', score: page.scores.aeo },
-                    ].map(({ label, score }) => (
-                      <View key={label} style={[S.pageDetailScoreChip, { backgroundColor: C.navyMid, borderRadius: 5, padding: '4 10' }]}>
-                        <Text style={[S.pageDetailScoreLabel]}>{label} </Text>
-                        <Text style={[S.pageDetailScoreVal, { color: scoreColor(score) }]}>{score}</Text>
-                      </View>
-                    ))}
-                  </View>
-
-                  {/* Score bars */}
-                  <View style={{ flexDirection: 'row', gap: 4, marginBottom: 10 }}>
-                    {[page.scores.overall, page.scores.seo, page.scores.aeo].map((s, i) => (
-                      <View key={i} style={{ flex: 1 }}>
-                        <View style={[S.scoreBarBg, { marginTop: 0 }]}>
-                          <View style={[S.scoreBarFill, { width: `${s}%`, backgroundColor: scoreColor(s) }]} />
-                        </View>
-                      </View>
-                    ))}
-                  </View>
-
-                  {/* Failing checks only (space-efficient) */}
-                  {(['meta', 'content', 'technical', 'aeo'] as const).map(section => {
-                    const failing = page[section].filter(c => c.status !== 'pass')
-                    if (failing.length === 0) return null
-                    return (
-                      <View key={section} style={S.checkSection}>
-                        <Text style={S.checkSectionTitle}>{section}</Text>
-                        {failing.map((c, idx) => (
-                          <View key={idx}>
-                            <View style={S.checkItem}>
-                              <View style={[S.checkDot, c.status === 'warning' ? S.checkDotWarn : S.checkDotFail]} />
-                              <Text style={S.checkTag}>{c.tag}</Text>
-                              <Text style={S.checkFound}>{truncate(c.found, 70)}</Text>
-                            </View>
-                            {c.recommendation && (
-                              <Text style={S.checkRec}>↳ {truncate(c.recommendation, 100)}</Text>
-                            )}
-                          </View>
-                        ))}
-                      </View>
-                    )
-                  })}
-                </View>
-              )
-            })}
+    <View style={S.pageDetailCard} wrap={false}>
+      {/* Header */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+        <Text style={[S.pageDetailUrl, { flex: 1, marginRight: 8 }]}>{formatUrl(page.url)}</Text>
+        <View style={{ flexDirection: 'row', gap: 4 }}>
+          <View style={{ backgroundColor: '#0c1a2e', borderRadius: 4, padding: '2 6' }}>
+            <Text style={{ fontSize: 7, color: C.cyan }}>D{page.depth}</Text>
           </View>
-          <PageFooter pageNum={`${5 + ci}`} total="—" />
-        </Page>
-      ))}
-    </>
+          {failCount > 0 && (
+            <View style={{ backgroundColor: '#450a0a', borderRadius: 4, padding: '2 6' }}>
+              <Text style={{ fontSize: 7, color: C.red }}>{failCount} fail{failCount !== 1 ? 's' : ''}</Text>
+            </View>
+          )}
+          {warnCount > 0 && (
+            <View style={{ backgroundColor: '#422006', borderRadius: 4, padding: '2 6' }}>
+              <Text style={{ fontSize: 7, color: C.yellow }}>{warnCount} warn{warnCount !== 1 ? 's' : ''}</Text>
+            </View>
+          )}
+        </View>
+      </View>
+
+      {/* Scores */}
+      <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
+        {[
+          { label: 'Overall', score: page.scores.overall },
+          { label: 'SEO', score: page.scores.seo },
+          { label: 'AEO', score: page.scores.aeo },
+        ].map(({ label, score }) => (
+          <View key={label} style={[S.pageDetailScoreChip, { backgroundColor: C.navyMid, borderRadius: 5, padding: '4 10' }]}>
+            <Text style={[S.pageDetailScoreLabel]}>{label} </Text>
+            <Text style={[S.pageDetailScoreVal, { color: scoreColor(score) }]}>{score}</Text>
+          </View>
+        ))}
+      </View>
+
+      {/* Score bars */}
+      <View style={{ flexDirection: 'row', gap: 4, marginBottom: 10 }}>
+        {[page.scores.overall, page.scores.seo, page.scores.aeo].map((s, i) => (
+          <View key={i} style={{ flex: 1 }}>
+            <View style={[S.scoreBarBg, { marginTop: 0 }]}>
+              <View style={[S.scoreBarFill, { width: `${s}%`, backgroundColor: scoreColor(s) }]} />
+            </View>
+          </View>
+        ))}
+      </View>
+
+      {/* Failing checks only (space-efficient) */}
+      {(['meta', 'content', 'technical', 'aeo'] as const).map(section => {
+        const failing = page[section].filter(c => c.status !== 'pass')
+        if (failing.length === 0) return null
+        return (
+          <View key={section} style={S.checkSection}>
+            <Text style={S.checkSectionTitle}>{section}</Text>
+            {failing.map((c, idx) => (
+              <View key={idx}>
+                <View style={S.checkItem}>
+                  <View style={[S.checkDot, c.status === 'warning' ? S.checkDotWarn : S.checkDotFail]} />
+                  <Text style={S.checkTag}>{c.tag}</Text>
+                  <Text style={S.checkFound}>{truncate(c.found, 70)}</Text>
+                </View>
+                {c.recommendation && (
+                  <Text style={S.checkRec}>↳ {truncate(c.recommendation, 100)}</Text>
+                )}
+              </View>
+            ))}
+          </View>
+        )
+      })}
+    </View>
+  )
+}
+
+function PageDetailPages({ pages }: { pages: PageAnalysis[] }) {
+  const hostname = pages[0] ? new URL(pages[0].url).hostname : ''
+
+  return (
+    <Page size="A4" style={S.page}>
+      {/* Fixed header/footer repeat on every overflow page */}
+      <View style={S.pageHeader} fixed>
+        <Text style={S.pageHeaderBrand}>SEO & AEO ANALYZER</Text>
+        <Text style={S.pageHeaderDomain}>{hostname}</Text>
+      </View>
+
+      <View style={{ padding: '24 40 16' }}>
+        <SectionHeader title="Per-Page Analysis" subtitle="Detailed checks for each crawled page" />
+        {pages.map((page) => (
+          <PageDetailCard key={page.url} page={page} />
+        ))}
+      </View>
+
+      <View style={S.pageFooter} fixed>
+        <Text style={S.pageFooterText}>Confidential — Generated by SEO & AEO Analyzer</Text>
+        <Text style={S.pageNum} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
+      </View>
+    </Page>
   )
 }
 
