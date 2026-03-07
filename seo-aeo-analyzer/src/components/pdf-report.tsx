@@ -321,14 +321,14 @@ function ScoresPage({ analysis }: { analysis: SiteAnalysis }) {
               { label: 'SEO Score', score: scores.seo, note: 'Meta 25% · Content 35% · Technical 40%' },
               { label: 'AEO Score', score: scores.aeo, note: 'Answer Engine Optimization' },
             ].map(({ label, score, note }) => (
-              <View key={label} style={[S.scoreCard, { borderColor: scoreColor(score) + '40', flex: 0 }]}>
-                <Text style={{ fontSize: 9, color: C.dim, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 4 }}>{label}</Text>
-                <Text style={[S.scoreNumSm, { color: scoreColor(score) }]}>{score}</Text>
-                <Text style={[S.scoreLbl, { color: scoreColor(score) }]}>{scoreLabel(score)}</Text>
-                <View style={S.scoreBarBg}>
-                  <View style={[S.scoreBarFill, { width: `${score}%`, backgroundColor: scoreColor(score) }]} />
+              <View key={label} style={{ backgroundColor: C.navyCard, borderRadius: 10, padding: '12 14', borderWidth: 1, borderColor: scoreColor(score) + '40' }}>
+                <Text style={{ fontSize: 8, color: C.dim, letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 4 }}>{label}</Text>
+                <Text style={{ fontSize: 28, fontFamily: 'Helvetica-Bold', color: scoreColor(score), letterSpacing: -1, marginBottom: 2 }}>{score}</Text>
+                <Text style={{ fontSize: 8, color: scoreColor(score), letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>{scoreLabel(score)}</Text>
+                <View style={{ height: 3, backgroundColor: C.navyBdr, borderRadius: 2, width: '100%', marginBottom: 6 }}>
+                  <View style={{ height: 3, borderRadius: 2, width: `${score}%`, backgroundColor: scoreColor(score) }} />
                 </View>
-                <Text style={S.scoreMeaning}>{note}</Text>
+                <Text style={{ fontSize: 7, color: C.dim, lineHeight: 1.4 }}>{note}</Text>
               </View>
             ))}
           </View>
