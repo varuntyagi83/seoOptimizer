@@ -81,7 +81,7 @@ const S = StyleSheet.create({
   scoreCard: { flex: 1, backgroundColor: C.navyCard, borderRadius: 10, padding: '20 16', alignItems: 'center', borderWidth: 1, borderColor: C.navyBdr },
   scoreCardMain: { flex: 2, backgroundColor: C.navyCard, borderRadius: 10, padding: '20 16', alignItems: 'center', borderWidth: 1, borderColor: C.navyBdr },
   scoreNum: { fontSize: 44, fontFamily: 'Helvetica-Bold', letterSpacing: -2 },
-  scoreNumSm: { fontSize: 36, fontFamily: 'Helvetica-Bold', letterSpacing: -1.5 },
+  scoreNumSm: { fontSize: 26, fontFamily: 'Helvetica-Bold', letterSpacing: -1 },
   scoreLbl: { fontSize: 9, color: C.muted, marginTop: 4, letterSpacing: 1.5, textTransform: 'uppercase' },
   scoreBarBg: { height: 4, backgroundColor: C.navyBdr, borderRadius: 2, width: '100%', marginTop: 12 },
   scoreBarFill: { height: 4, borderRadius: 2 },
@@ -321,7 +321,7 @@ function ScoresPage({ analysis }: { analysis: SiteAnalysis }) {
               { label: 'SEO Score', score: scores.seo, note: 'Meta 25% · Content 35% · Technical 40%' },
               { label: 'AEO Score', score: scores.aeo, note: 'Answer Engine Optimization' },
             ].map(({ label, score, note }) => (
-              <View key={label} style={[S.scoreCard, { borderColor: scoreColor(score) + '40' }]}>
+              <View key={label} style={[S.scoreCard, { borderColor: scoreColor(score) + '40', flex: 0 }]}>
                 <Text style={{ fontSize: 9, color: C.dim, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 4 }}>{label}</Text>
                 <Text style={[S.scoreNumSm, { color: scoreColor(score) }]}>{score}</Text>
                 <Text style={[S.scoreLbl, { color: scoreColor(score) }]}>{scoreLabel(score)}</Text>
